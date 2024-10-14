@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <title>PWM生成器</title>
+    </head>
+
+    <body>
+        <h1>PWM生成器</h1>
+        <div>
+            <label>周波数</label><input type="number" id="freq" value="50" min="20" max="20000"> Hz
+        </div>
+        <div>
+            <label>デューティー比</label><input type="number" id="duty" value="50" min="0" max="100"> %
+        </div>
+        <div>
+            <button id="toggle">再生</button>
+        </div>
+
+        <script>
+            let freq = 50;
+            let duty = 50;
+
+            document.getElementById("freq").addEventListener("input", (e) => {
+                freq = Number(e.target.value);
+            });
+            document.getElementById("duty").addEventListener("input", (e) => {
+                duty = Number(e.target.value);
+            });
+            document.getElementById("toggle").addEventListener("click", (e) => {
+                if (e.target.textContent === "再生") {
+                    play();
+                    e.target.textContent = "停止";
+                } else {
+                    stop();
+                    e.target.textContent = "再生";
+                }
+            });
+
+            const audioContext = new AudioContext();
+            let source;
+
+            function play() {
+                const buffer = new AudioBuffer({ length: audioContext.sampleRate / freq, sampleRate: audioContext.sampleRate });
+                const channelData = buffer.getChannelData(0);
+                for (let i = 0; i < channelData.length; i++) {
+                    channelData[i] = i / channelData.length < duty / 100 ? 1 : -1;
+                }
+                source = new AudioBufferSourceNode(audioContext, { buffer: buffer, loop: true });
+                source.connect(audioContext.destination);
+                source.start();
+            }
+            function stop() {
+                source.disconnect();
+            }
+        </script>
+    </body>
+
+</html>
