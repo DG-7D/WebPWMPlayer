@@ -10,7 +10,7 @@
     <body>
         <h1>PWM生成器</h1>
         <div>
-            <label>周波数</label><input type="number" id="freq" value="50" min="20" max="20000"> Hz
+            <label>周波数</label><input type="number" id="freq" value="50" min="20" max="20000" disabled> Hz
         </div>
         <div>
             <label>デューティー比</label><input type="number" id="duty" value="50" min="0" max="100"> %
@@ -28,6 +28,7 @@
             });
             document.getElementById("duty").addEventListener("input", (e) => {
                 duty = Number(e.target.value);
+                updateBuffer();
             });
             document.getElementById("toggle").addEventListener("click", (e) => {
                 if (e.target.textContent === "再生") {
@@ -40,17 +41,22 @@
             });
 
             const audioContext = new AudioContext();
-            let source;
+            const source = audioContext.createBufferSource();
+            source.loop = true;
+            source.start();
+            const buffer = audioContext.createBuffer(1, audioContext.sampleRate / freq, audioContext.sampleRate);
+            source.buffer = buffer;
+            updateBuffer();
 
-            function play() {
-                const buffer = new AudioBuffer({ length: audioContext.sampleRate / freq, sampleRate: audioContext.sampleRate });
-                const channelData = buffer.getChannelData(0);
-                for (let i = 0; i < channelData.length; i++) {
-                    channelData[i] = i / channelData.length < duty / 100 ? 1 : -1;
+            function updateBuffer() {
+                const newChannelData = new Float32Array(buffer.length);
+                for (let i = 0; i < newChannelData.length; i++) {
+                    newChannelData[i] = i / newChannelData.length < duty / 100 ? 1 : -1;
                 }
-                source = new AudioBufferSourceNode(audioContext, { buffer: buffer, loop: true });
+                buffer.copyToChannel(newChannelData, 0);
+            }
+            function play() {
                 source.connect(audioContext.destination);
-                source.start();
             }
             function stop() {
                 source.disconnect();
