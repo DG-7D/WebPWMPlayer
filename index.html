@@ -15,7 +15,7 @@
         </div>
         <div>
             <label>デューティー比</label><input type="number" id="duty" value="7.5" min="0" max="100" step="0.5"> %,
-            <label>パルス幅</label> <input type="number" id="pulse" value="10000" min="0" max="50000" readonly> μs
+            <label>パルス幅</label> <input type="number" id="pulse" value="1500" min="0" max="50000" readonly> μs
         </div>
         <div>
             <button id="toggle">再生</button>
@@ -42,33 +42,26 @@
                     e.target.textContent = "再生";
                 }
             });
-
+            
             const audioContext = new AudioContext();
             audioContext.suspend();
             let source;
             updateBuffer();
-
+            
             function updateBuffer() {
                 document.getElementById("lambda").value = (1 / freq * 1000000).toFixed(0);
                 document.getElementById("pulse").value = (1 / freq * 1000000 * duty / 100).toFixed(0);
-
+                
+                source?.stop();
+                source?.disconnect();
+                
                 const loopLength = Math.floor(audioContext.sampleRate / freq);
-                const newChannelDataL = new Float32Array(loopLength)
-                    .fill(1)
-                    .fill(-1, loopLength * duty / 100);
-                const newChannelDataR = new Float32Array(loopLength)
-                    .fill(-1)
-                    .fill(1, loopLength * duty / 100);
-                if (!source || loopLength !== source.buffer.length) {
-                    source?.disconnect();
-                    source?.stop();
-                    const buffer = new AudioBuffer({ length: loopLength, numberOfChannels: 2, sampleRate: audioContext.sampleRate });
-                    source = new AudioBufferSourceNode(audioContext, { buffer: buffer, loop: true });
-                    source.start();
-                    source.connect(audioContext.destination);
-                }
-                source.buffer.copyToChannel(newChannelDataL, 0);
-                source.buffer.copyToChannel(newChannelDataR, 1);
+                const buffer = new AudioBuffer({ length: loopLength, numberOfChannels: 2, sampleRate: audioContext.sampleRate });
+                buffer.getChannelData(0).fill(1).fill(-1, loopLength * duty / 100);
+                buffer.getChannelData(1).fill(-1).fill(1, loopLength * duty / 100);
+                source = new AudioBufferSourceNode(audioContext, { buffer: buffer, loop: true });
+                source.connect(audioContext.destination);
+                source.start();
             }
             function play() {
                 audioContext.resume();
