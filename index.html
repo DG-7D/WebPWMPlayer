@@ -10,10 +10,12 @@
     <body>
         <h1>PWM生成器</h1>
         <div>
-            <label>周波数</label><input type="number" id="freq" value="50" min="20" max="20000"> Hz
+            <label>周波数</label> <input type="number" id="freq" value="50" min="20" max="20000" step="10"> Hz,
+            <label>波長</label> <input type="number" id="lambda" value="20000" min="50" max="50000" readonly> μs
         </div>
         <div>
-            <label>デューティー比</label><input type="number" id="duty" value="50" min="0" max="100"> %
+            <label>デューティー比</label><input type="number" id="duty" value="7.5" min="0" max="100" step="0.5"> %,
+            <label>パルス幅</label> <input type="number" id="pulse" value="10000" min="0" max="50000" readonly> μs
         </div>
         <div>
             <button id="toggle">再生</button>
@@ -21,7 +23,7 @@
 
         <script>
             let freq = 50;
-            let duty = 50;
+            let duty = 7.5;
 
             document.getElementById("freq").addEventListener("input", (e) => {
                 freq = Number(e.target.value);
@@ -42,10 +44,14 @@
             });
 
             const audioContext = new AudioContext();
+            audioContext.suspend();
             let source;
             updateBuffer();
 
             function updateBuffer() {
+                document.getElementById("lambda").value = (1 / freq * 1000000).toFixed(0);
+                document.getElementById("pulse").value = (1 / freq * 1000000 * duty / 100).toFixed(0);
+
                 const loopLength = Math.floor(audioContext.sampleRate / freq);
                 const newChannelData = new Float32Array(loopLength)
                     .fill(-1)
