@@ -56,6 +56,9 @@ function PwmGenerator() {
 
         const sampleRate = audioContextRef.current.sampleRate;
         const loopLength = Math.floor(sampleRate * lambda / 1000000);
+        if (loopLength < 1) {
+            return;
+        }
         const buffer = new AudioBuffer({
             length: loopLength,
             numberOfChannels: inverted ? 2 : 1,
