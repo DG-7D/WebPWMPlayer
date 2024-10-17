@@ -83,7 +83,7 @@ function PwmGenerator() {
                 <label>周波数</label> <input type="number" value={Math.round(1e6 / lambda)} min={freqMin} max={freqMax} step={1} onChange={handleFreqChange} /> Hz
             </div>
             <div>
-                <label>パルス幅</label> <input type="number" value={Math.round(width)} min={0} max={lambda} step={100} onChange={handlePulseChange} /> μs,
+                <label>パルス幅</label> <input type="number" value={Math.round(width)} min={0} max={Math.ceil(lambda)} step={100} onChange={handlePulseChange} /> μs,
                 <label>デューティ比</label> <input type="number" value={Math.round(width / lambda * 100 * 10) / 10} min={0} max={100} step={0.5} onChange={handleDutyChange} /> %
             </div>
             <div>
