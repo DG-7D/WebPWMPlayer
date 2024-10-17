@@ -2,6 +2,9 @@ import React from 'react';
 
 function PwmGenerator() {
 
+    const audioContextRef = React.useRef(new AudioContext());
+    const sourceRef = React.useRef<AudioBufferSourceNode>();
+
     const [lambda, setLambda] = React.useState<number>(20000);
     const [width, setWidth] = React.useState<number>(15000);
     const [inverted, setInverted] = React.useState<boolean>(false);
@@ -28,6 +31,32 @@ function PwmGenerator() {
     function handleStopClick() {
         setPlaying(false);
     }
+
+    React.useEffect(() => {
+        sourceRef.current?.stop();
+        sourceRef.current?.disconnect();
+
+        const sampleRate = audioContextRef.current.sampleRate;
+        const loopLength = Math.floor(sampleRate * lambda / 1000000);
+        const buffer = new AudioBuffer({
+            length: loopLength,
+            numberOfChannels: inverted ? 2 : 1,
+            sampleRate: sampleRate,
+        });
+        buffer.getChannelData(0).fill(1).fill(-1, width / 1000000 * sampleRate);
+        inverted && buffer.getChannelData(1).fill(-1).fill(1, width / 1000000 * sampleRate);
+        sourceRef.current = new AudioBufferSourceNode(audioContextRef.current, { buffer: buffer, loop: true });
+
+        sourceRef.current.connect(audioContextRef.current.destination);
+        sourceRef.current.start();
+    }, [lambda, width, inverted]);
+    React.useEffect(() => {
+        if (playing) {
+            audioContextRef.current.resume();
+        } else {
+            audioContextRef.current.suspend();
+        }
+    }, [playing]);
 
     return (
         <>
