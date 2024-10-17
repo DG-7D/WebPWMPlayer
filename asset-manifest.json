@@ -1,12 +1,12 @@
 {
   "files": {
-    "main.js": "/static/js/main.d117ad45.js",
-    "static/js/453.69f3745b.chunk.js": "/static/js/453.69f3745b.chunk.js",
-    "index.html": "/index.html",
-    "main.d117ad45.js.map": "/static/js/main.d117ad45.js.map",
-    "453.69f3745b.chunk.js.map": "/static/js/453.69f3745b.chunk.js.map"
+    "main.js": "/WebPWMPlayer/static/js/main.779c359e.js",
+    "static/js/453.69f3745b.chunk.js": "/WebPWMPlayer/static/js/453.69f3745b.chunk.js",
+    "index.html": "/WebPWMPlayer/index.html",
+    "main.779c359e.js.map": "/WebPWMPlayer/static/js/main.779c359e.js.map",
+    "453.69f3745b.chunk.js.map": "/WebPWMPlayer/static/js/453.69f3745b.chunk.js.map"
   },
   "entrypoints": [
-    "static/js/main.d117ad45.js"
+    "static/js/main.779c359e.js"
   ]
 }
