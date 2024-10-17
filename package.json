@@ -21,6 +21,7 @@
     "build": "react-scripts build",
     "deploy": "gh-pages -d build"
   },
+  "homepage": "https://dg-7d.github.io/WebPWMPlayer/",
   "eslintConfig": {
     "extends": [
       "react-app",
