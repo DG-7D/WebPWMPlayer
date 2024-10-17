@@ -6,15 +6,19 @@ function PwmGenerator() {
     const sourceRef = React.useRef<AudioBufferSourceNode>();
 
     const [lambda, setLambda] = React.useState<number>(20000);
-    const [width, setWidth] = React.useState<number>(15000);
+    const [width, setWidth] = React.useState<number>(1500);
     const [inverted, setInverted] = React.useState<boolean>(false);
     const [playing, setPlaying] = React.useState<boolean>(false);
 
     function handleLambdaChange(event: React.ChangeEvent<HTMLInputElement>) {
-        setLambda(event.target.valueAsNumber);
+        const newLambda = event.target.valueAsNumber;
+        setLambda(newLambda);
+        setWidth(Math.min(width, newLambda));
     }
     function handleFreqChange(event: React.ChangeEvent<HTMLInputElement>) {
-        setLambda(1000000 / event.target.valueAsNumber);
+        const newLambda = 1000000 / event.target.valueAsNumber;
+        setLambda(newLambda);
+        setWidth(width * newLambda / lambda);
     }
     function handlePulseChange(event: React.ChangeEvent<HTMLInputElement>) {
         setWidth(event.target.valueAsNumber);
@@ -66,7 +70,7 @@ function PwmGenerator() {
                 <label>周波数</label> <input type="number" value={Math.round(1000000 / lambda)} min={20} max={20000} step={1} onChange={handleFreqChange} /> Hz
             </div>
             <div>
-                <label>パルス幅</label> <input type="number" value={Math.round(width)} step={100} onChange={handlePulseChange} /> μs,
+                <label>パルス幅</label> <input type="number" value={Math.round(width)} min={0} max={lambda} step={100} onChange={handlePulseChange} /> μs,
                 <label>デューティ比</label> <input type="number" value={Math.round(width / lambda * 100 * 10) / 10} min={0} max={100} step={0.5} onChange={handleDutyChange} /> %
             </div>
             <div>
