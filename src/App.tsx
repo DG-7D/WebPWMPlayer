@@ -1,5 +1,8 @@
 import React from 'react';
 
+const freqMin = 20;
+const freqMax = 20000;
+
 function PwmGenerator() {
 
     const audioContextRef = React.useRef<AudioContext>();
@@ -16,7 +19,7 @@ function PwmGenerator() {
         setWidth(Math.min(width, newLambda));
     }
     function handleFreqChange(event: React.ChangeEvent<HTMLInputElement>) {
-        const newLambda = 1000000 / event.target.valueAsNumber;
+        const newLambda = 1e6 / event.target.valueAsNumber;
         setLambda(newLambda);
         setWidth(width * newLambda / lambda);
     }
@@ -55,7 +58,7 @@ function PwmGenerator() {
         sourceRef.current?.disconnect();
 
         const sampleRate = audioContextRef.current.sampleRate;
-        const loopLength = Math.floor(sampleRate * lambda / 1000000);
+        const loopLength = Math.floor(sampleRate * lambda / 1e6);
         if (loopLength < 1) {
             return;
         }
@@ -64,8 +67,8 @@ function PwmGenerator() {
             numberOfChannels: inverted ? 2 : 1,
             sampleRate: sampleRate,
         });
-        buffer.getChannelData(0).fill(1).fill(-1, width / 1000000 * sampleRate);
-        inverted && buffer.getChannelData(1).fill(-1).fill(1, width / 1000000 * sampleRate);
+        buffer.getChannelData(0).fill(1).fill(-1, width / 1e6 * sampleRate);
+        inverted && buffer.getChannelData(1).fill(-1).fill(1, width / 1e6 * sampleRate);
         sourceRef.current = new AudioBufferSourceNode(audioContextRef.current, { buffer: buffer, loop: true });
 
         sourceRef.current.connect(audioContextRef.current.destination);
@@ -76,8 +79,8 @@ function PwmGenerator() {
         <>
             <h1>パルス幅変調再生器</h1>
             <div>
-                <label>波長</label> <input type="number" value={Math.round(lambda)} step={100} onChange={handleLambdaChange} /> μs,
-                <label>周波数</label> <input type="number" value={Math.round(1000000 / lambda)} min={20} max={20000} step={1} onChange={handleFreqChange} /> Hz
+                <label>波長</label> <input type="number" value={Math.round(lambda)} min={1e6 / freqMax} max={1e6 / freqMin} step={100} onChange={handleLambdaChange} /> μs,
+                <label>周波数</label> <input type="number" value={Math.round(1e6 / lambda)} min={freqMin} max={freqMax} step={1} onChange={handleFreqChange} /> Hz
             </div>
             <div>
                 <label>パルス幅</label> <input type="number" value={Math.round(width)} min={0} max={lambda} step={100} onChange={handlePulseChange} /> μs,
