@@ -2,7 +2,7 @@ import React from 'react';
 
 function PwmGenerator() {
 
-    const audioContextRef = React.useRef(new AudioContext());
+    const audioContextRef = React.useRef<AudioContext>();
     const sourceRef = React.useRef<AudioBufferSourceNode>();
 
     const [lambda, setLambda] = React.useState<number>(20000);
@@ -37,6 +37,20 @@ function PwmGenerator() {
     }
 
     React.useEffect(() => {
+        if (audioContextRef.current?.state === 'closed') {
+            audioContextRef.current = undefined;
+        }
+
+        if (!playing) {
+            audioContextRef.current?.suspend();
+            return;
+        }
+
+        if (!audioContextRef.current) {
+            audioContextRef.current = new AudioContext();
+        }
+        audioContextRef.current.resume();
+
         sourceRef.current?.stop();
         sourceRef.current?.disconnect();
 
@@ -53,14 +67,7 @@ function PwmGenerator() {
 
         sourceRef.current.connect(audioContextRef.current.destination);
         sourceRef.current.start();
-    }, [lambda, width, inverted]);
-    React.useEffect(() => {
-        if (playing) {
-            audioContextRef.current.resume();
-        } else {
-            audioContextRef.current.suspend();
-        }
-    }, [playing]);
+    }, [lambda, width, inverted, playing]);
 
     return (
         <>
