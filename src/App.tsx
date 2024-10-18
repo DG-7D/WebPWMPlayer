@@ -40,18 +40,21 @@ function PwmGenerator() {
     }
 
     React.useEffect(() => {
-        if (audioContextRef.current?.state === 'closed') {
-            audioContextRef.current = undefined;
-        }
+        audioContextRef.current = new AudioContext();
+        return () => {
+            audioContextRef.current?.close();
+        };
+    }, []);
 
+    React.useEffect(() => {
+        if (!audioContextRef.current) {
+            return;
+        }
         if (!playing) {
-            audioContextRef.current?.suspend();
+            audioContextRef.current.suspend();
             return;
         }
 
-        if (!audioContextRef.current) {
-            audioContextRef.current = new AudioContext();
-        }
         audioContextRef.current.resume();
 
         sourceRef.current?.stop();
