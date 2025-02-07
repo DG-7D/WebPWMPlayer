@@ -5,8 +5,8 @@ const freqMax = 20000;
 
 function PwmGenerator() {
 
-    const audioContextRef = React.useRef<AudioContext>();
-    const sourceRef = React.useRef<AudioBufferSourceNode>();
+    const audioContextRef = React.useRef<AudioContext>(undefined);
+    const sourceRef = React.useRef<AudioBufferSourceNode>(undefined);
 
     const [lambda, setLambda] = React.useState<number>(20000);
     const [width, setWidth] = React.useState<number>(1500);
