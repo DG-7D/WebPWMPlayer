@@ -12,6 +12,7 @@ function PwmGenerator() {
     const [width, setWidth] = React.useState<number>(1500);
     const [inverted, setInverted] = React.useState<boolean>(false);
     const [playing, setPlaying] = React.useState<boolean>(false);
+    const [cutDc, setCutDc] = React.useState<boolean>(true);
 
     function handleLambdaChange(event: React.ChangeEvent<HTMLInputElement>) {
         const newLambda = event.target.valueAsNumber;
@@ -65,18 +66,31 @@ function PwmGenerator() {
         if (loopLength < 1) {
             return;
         }
+        const pulseLength = Math.floor(sampleRate * width / 1e6);
+
+        let highLevel = 1;
+        let lowLevel = -1;
+        if (cutDc) {
+            if (pulseLength < loopLength / 2) {
+                highLevel = 1;
+                lowLevel = -pulseLength / (loopLength - pulseLength);
+            } else {
+                highLevel = (loopLength - pulseLength) / pulseLength;
+                lowLevel = -1;
+            }
+        }
         const buffer = new AudioBuffer({
             length: loopLength,
             numberOfChannels: inverted ? 2 : 1,
             sampleRate: sampleRate,
         });
-        buffer.getChannelData(0).fill(1).fill(-1, width / 1e6 * sampleRate);
-        inverted && buffer.getChannelData(1).fill(-1).fill(1, width / 1e6 * sampleRate);
+        buffer.getChannelData(0).fill(highLevel).fill(lowLevel, pulseLength);
+        inverted && buffer.getChannelData(1).fill(lowLevel).fill(highLevel, pulseLength);
         sourceRef.current = new AudioBufferSourceNode(audioContextRef.current, { buffer: buffer, loop: true });
 
         sourceRef.current.connect(audioContextRef.current.destination);
         sourceRef.current.start();
-    }, [lambda, width, inverted, playing]);
+    }, [lambda, width, inverted, playing, cutDc]);
 
     return (
         <>
@@ -91,6 +105,9 @@ function PwmGenerator() {
             </div>
             <div>
                 <label>右チャンネルを反転</label> <input type="checkbox" checked={inverted} onChange={handleInvertChange} />
+            </div>
+            <div>
+                <label>直流成分をカット</label> <input type="checkbox" checked={cutDc} onChange={(event) => setCutDc(event.target.checked)} />
             </div>
             <div>
                 {playing
