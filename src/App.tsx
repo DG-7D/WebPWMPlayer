@@ -63,11 +63,9 @@ function PwmGenerator() {
         let lowLevel = -1;
         if (cutDc) {
             if (pulseSamples < waveSamples / 2) {
-                highLevel = 1;
                 lowLevel = -pulseSamples / (waveSamples - pulseSamples);
             } else {
                 highLevel = (waveSamples - pulseSamples) / pulseSamples;
-                lowLevel = -1;
             }
         }
         const buffer = new AudioBuffer({
