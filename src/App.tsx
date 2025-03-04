@@ -107,7 +107,7 @@ function PwmGenerator() {
     );
 }
 
-function App() {
+export function App() {
     return (
         <PwmGenerator />
     );
